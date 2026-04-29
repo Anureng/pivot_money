@@ -22,6 +22,13 @@ router.get('/', async (req, res) => {
     // 4. Calculate Portfolio
     const portfolio = portfolioService.calculatePortfolio(deduplicatedData);
 
+    // 5. Extract User Info
+    let userName = 'Demo User';
+    if (orderData && orderData.length > 0 && orderData[0].ucc_full_name) {
+      userName = orderData[0].ucc_full_name.trim();
+    }
+    portfolio.userInfo = { name: userName };
+
     logger.info('Portfolio data successfully generated');
     res.json(portfolio);
 

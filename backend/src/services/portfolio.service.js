@@ -24,6 +24,7 @@ const calculatePortfolio = (deduplicatedData) => {
     if (!holdingsMap[tx.isin]) {
       holdingsMap[tx.isin] = {
         isin: tx.isin,
+        folio: tx.folio,
         assetName: tx.assetName || tx.isin,
         type: tx.type,
         totalQuantity: 0,

@@ -125,7 +125,7 @@ function HoldingsTable({ holdings }) {
                     </div>
                     <div>
                       <div className="asset-name">{h.assetName || `Asset ${i+1}`}</div>
-                      <div className="asset-id">{h.isin}</div>
+                      <div className="asset-id">{h.isin} {h.folio ? `• Folio: ${h.folio}` : ''}</div>
                     </div>
                   </div>
                 </td>
@@ -153,8 +153,17 @@ function HoldingsTable({ holdings }) {
 }
 
 function TransactionsTable({ transactions }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Sort by date desc
   const sortedTx = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const totalPages = Math.ceil(sortedTx.length / itemsPerPage);
+  const currentData = sortedTx.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePrev = () => setCurrentPage(p => Math.max(1, p - 1));
+  const handleNext = () => setCurrentPage(p => Math.min(totalPages, p + 1));
 
   return (
     <div className="glass-panel animate-fade-in" style={{animationDelay: '0.2s'}}>
@@ -170,9 +179,9 @@ function TransactionsTable({ transactions }) {
             </tr>
           </thead>
           <tbody>
-            {sortedTx.length === 0 ? (
+            {currentData.length === 0 ? (
               <tr><td colSpan="5" style={{textAlign: 'center'}} className="text-muted">No transactions found</td></tr>
-            ) : sortedTx.map((tx, i) => (
+            ) : currentData.map((tx, i) => (
               <tr key={tx.transactionId + i}>
                 <td style={{whiteSpace: 'nowrap'}}>{formatDate(tx.date)}</td>
                 <td>
@@ -211,6 +220,22 @@ function TransactionsTable({ transactions }) {
           </tbody>
         </table>
       </div>
+      
+      {totalPages > 1 && (
+        <div className="flex-between" style={{padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)'}}>
+          <span className="text-muted" style={{fontSize: '0.85rem'}}>
+            Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedTx.length)} of {sortedTx.length} entries
+          </span>
+          <div style={{display: 'flex', gap: '0.5rem'}}>
+            <button className="btn btn-ghost" onClick={handlePrev} disabled={currentPage === 1} style={{padding: '0.5rem 1rem'}}>
+              Previous
+            </button>
+            <button className="btn btn-ghost" onClick={handleNext} disabled={currentPage === totalPages} style={{padding: '0.5rem 1rem'}}>
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -272,8 +297,8 @@ function App() {
           <span className="brand-title">Pivot Wealth</span>
         </div>
         <div className="user-profile">
-          <span className="text-muted" style={{fontSize: '0.9rem'}}>Demo User</span>
-          <img src="https://ui-avatars.com/api/?name=Demo+User&background=3b82f6&color=fff" alt="User Avatar" className="avatar" />
+          <span className="text-muted" style={{fontSize: '0.9rem'}}>{data.userInfo?.name || 'Demo User'}</span>
+          <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(data.userInfo?.name || 'Demo User')}&background=3b82f6&color=fff`} alt="User Avatar" className="avatar" />
         </div>
       </header>
 

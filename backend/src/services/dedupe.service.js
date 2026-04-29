@@ -7,8 +7,17 @@ const deduplicate = (normalizedData) => {
   const uniqueMap = new Map();
 
   normalizedData.forEach(record => {
+    // Normalize date to YYYY-MM-DD to ensure matching across different date formats (e.g. 18-DEC-2025 vs 2026-04-05T21:10:00Z)
+    let normalizedDate = String(record.date);
+    try {
+      const d = new Date(record.date);
+      if (!isNaN(d.getTime())) {
+        normalizedDate = d.toISOString().split('T')[0];
+      }
+    } catch(e) {}
+
     // Unique composite key
-    const key = `${record.isin}-${record.folio}-${record.date}-${record.amount}`;
+    const key = `${record.isin}-${record.folio}-${normalizedDate}-${Math.abs(record.amount)}`;
 
     if (uniqueMap.has(key)) {
       const existingRecord = uniqueMap.get(key);
